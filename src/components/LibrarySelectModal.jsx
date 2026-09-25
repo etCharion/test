@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Library, Plus, ArrowRight, Table, ExternalLink } from 'lucide-react';
+import { Library, Plus, ArrowRight, Table } from 'lucide-react';
+
+const DEFAULT_LIBRARIES = [
+  {
+    id: 1,
+    name: 'Moje Domácí Knihovna',
+    google_sheet_url: '',
+    created_at: new Date().toISOString()
+  }
+];
 
 export default function LibrarySelectModal({ role, currentLibrary, onSelectLibrary }) {
   const [libraries, setLibraries] = useState([]);
@@ -10,19 +19,22 @@ export default function LibrarySelectModal({ role, currentLibrary, onSelectLibra
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchLibraries();
+    loadLibraries();
   }, []);
 
-  const fetchLibraries = async () => {
+  const loadLibraries = () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/libraries');
-      if (res.ok) {
-        const data = await res.json();
-        setLibraries(data);
+      const saved = localStorage.getItem('knihovnicka_libraries');
+      if (saved) {
+        setLibraries(JSON.parse(saved));
+      } else {
+        localStorage.setItem('knihovnicka_libraries', JSON.stringify(DEFAULT_LIBRARIES));
+        setLibraries(DEFAULT_LIBRARIES);
       }
     } catch (err) {
-      console.error('Chyba při načítání knihoven:', err);
+      console.error('Chyba při načítání knihoven z LocalStorage:', err);
+      setLibraries(DEFAULT_LIBRARIES);
     } finally {
       setLoading(false);
     }
@@ -32,7 +44,7 @@ export default function LibrarySelectModal({ role, currentLibrary, onSelectLibra
     onSelectLibrary(lib);
   };
 
-  const handleCreate = async (e) => {
+  const handleCreate = (e) => {
     e.preventDefault();
     if (!newLibraryName.trim()) {
       setError('Zadejte název knihovny');
@@ -40,24 +52,22 @@ export default function LibrarySelectModal({ role, currentLibrary, onSelectLibra
     }
 
     try {
-      const res = await fetch('/api/libraries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: newLibraryName.trim(),
-          google_sheet_url: googleSheetUrl.trim()
-        })
-      });
+      const saved = localStorage.getItem('knihovnicka_libraries');
+      const currentLibs = saved ? JSON.parse(saved) : DEFAULT_LIBRARIES;
 
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || 'Chyba při vytváření knihovny');
-      }
+      const newLib = {
+        id: Date.now(),
+        name: newLibraryName.trim(),
+        google_sheet_url: googleSheetUrl.trim(),
+        created_at: new Date().toISOString()
+      };
 
-      const created = await res.json();
-      onSelectLibrary(created);
+      const updatedLibs = [...currentLibs, newLib];
+      localStorage.setItem('knihovnicka_libraries', JSON.stringify(updatedLibs));
+      setLibraries(updatedLibs);
+      onSelectLibrary(newLib);
     } catch (err) {
-      setError(err.message);
+      setError('Chyba při ukládání knihovny do LocalStorage');
     }
   };
 
