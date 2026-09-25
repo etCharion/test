@@ -20,14 +20,32 @@ export default function Sidebar({
   onChangeRoleClick,
   totalCount,
   availableCount,
-  borrowedCount
+  borrowedCount,
+  books = []
 }) {
   if (!isOpen) return null;
 
   const handleExportCsv = () => {
-    if (currentLibrary) {
-      window.open(`/api/libraries/${currentLibrary.id}/export/csv`, '_blank');
+    if (!currentLibrary) return;
+
+    let csvContent = '\uFEFF'; // BOM for UTF-8 in Excel / Google Sheets
+    csvContent += 'ID;ISBN;Název;Autor;Rok vydání;Žánr;Věková skupina;Jazyk;Stav;Datum naskenování;Poznámky\n';
+
+    for (const b of books) {
+      const escape = (str) => `"${(str || '').replace(/"/g, '""')}"`;
+      csvContent += `${b.id};${escape(b.isbn)};${escape(b.title)};${escape(b.author)};${escape(b.year)};${escape(b.genre)};${escape(b.target_age)};${escape(b.language)};${escape(b.status)};${escape(b.scanned_at)};${escape(b.notes)}\n`;
     }
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const safeFilename = encodeURIComponent((currentLibrary.name || 'knihovna').replace(/\s+/g, '_'));
+    link.setAttribute('href', url);
+    link.setAttribute('download', `knihovna_${safeFilename}_export.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
