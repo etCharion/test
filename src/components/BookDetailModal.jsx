@@ -1,7 +1,7 @@
 import React from 'react';
-import { X, Book, User, Calendar, Tag, Globe, Users, CheckCircle2, Clock, Barcode, Trash2 } from 'lucide-react';
+import { X, Book, User, Calendar, Tag, Globe, Users, CheckCircle2, Clock, Barcode, Trash2, Edit3 } from 'lucide-react';
 
-export default function BookDetailModal({ book, isOpen, onClose, role, onToggleStatus, onDelete }) {
+export default function BookDetailModal({ book, isOpen, onClose, role, onToggleStatus, onEdit, onDelete }) {
   if (!isOpen || !book) return null;
 
   const isAvailable = book.status === 'Dostupná';
@@ -102,31 +102,48 @@ export default function BookDetailModal({ book, isOpen, onClose, role, onToggleS
 
         {/* Actions for Librarian */}
         {role === 'librarian' ? (
-          <div className="pt-3 border-t border-[#d7ccc8] flex space-x-2">
-            <button
-              onClick={() => {
-                onToggleStatus(book);
-                onClose();
-              }}
-              className={`flex-1 py-3 rounded-xl font-bold text-sm text-white shadow-md transition-colors cursor-pointer ${
-                isAvailable ? 'bg-amber-700 hover:bg-amber-800' : 'bg-emerald-700 hover:bg-emerald-800'
-              }`}
-            >
-              {isAvailable ? 'Označit knihu jako Půjčenou' : 'Označit knihu jako Dostupnou'}
-            </button>
-
-            {onDelete && (
+          <div className="pt-3 border-t border-[#d7ccc8] flex flex-col space-y-2">
+            <div className="flex space-x-2">
               <button
                 onClick={() => {
-                  onDelete(book.id);
+                  onToggleStatus(book);
                   onClose();
                 }}
-                className="px-3 py-3 bg-red-100 hover:bg-red-200 text-red-800 font-bold rounded-xl text-xs flex items-center space-x-1 cursor-pointer"
+                className={`flex-1 py-3 rounded-xl font-bold text-sm text-white shadow-md transition-colors cursor-pointer ${
+                  isAvailable ? 'bg-amber-700 hover:bg-amber-800' : 'bg-emerald-700 hover:bg-emerald-800'
+                }`}
               >
-                <Trash2 className="w-4 h-4" />
-                <span>Smazat</span>
+                {isAvailable ? 'Označit jako Půjčenou' : 'Označit jako Dostupnou'}
               </button>
-            )}
+            </div>
+
+            <div className="flex space-x-2 pt-1">
+              {onEdit && (
+                <button
+                  onClick={() => {
+                    onClose();
+                    onEdit(book);
+                  }}
+                  className="flex-1 py-2.5 bg-[#efe6d5] hover:bg-[#e8ddc8] text-[#3a2212] border border-[#a1887f] font-bold rounded-xl text-xs flex items-center justify-center space-x-1 cursor-pointer"
+                >
+                  <Edit3 className="w-4 h-4 text-[#8b2626]" />
+                  <span>Upravit informace o knize</span>
+                </button>
+              )}
+
+              {onDelete && (
+                <button
+                  onClick={() => {
+                    onDelete(book.id);
+                    onClose();
+                  }}
+                  className="px-4 py-2.5 bg-red-100 hover:bg-red-200 text-red-800 font-bold rounded-xl text-xs flex items-center space-x-1 cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Smazat</span>
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           <button
