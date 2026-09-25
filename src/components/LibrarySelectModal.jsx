@@ -13,6 +13,23 @@ export default function LibrarySelectModal({ role, currentLibrary, onSelectLibra
     fetchLibraries();
   }, []);
 
+  const getLocalLibraries = () => {
+    try {
+      const saved = localStorage.getItem('knihovnicka_libraries');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const saveLocalLibraries = (libs) => {
+    try {
+      localStorage.setItem('knihovnicka_libraries', JSON.stringify(libs));
+    } catch (e) {
+      console.error('Local storage save error:', e);
+    }
+  };
+
   const fetchLibraries = async () => {
     setLoading(true);
     try {
@@ -20,9 +37,13 @@ export default function LibrarySelectModal({ role, currentLibrary, onSelectLibra
       if (res.ok) {
         const data = await res.json();
         setLibraries(data);
+        saveLocalLibraries(data);
+      } else {
+        setLibraries(getLocalLibraries());
       }
     } catch (err) {
       console.error('Chyba při načítání knihoven:', err);
+      setLibraries(getLocalLibraries());
     } finally {
       setLoading(false);
     }
@@ -54,10 +75,33 @@ export default function LibrarySelectModal({ role, currentLibrary, onSelectLibra
         throw new Error(errData.error || 'Chyba při vytváření knihovny');
       }
 
-      const created = await res.json();
+      let created;
+      if (res.ok) {
+        created = await res.json();
+      } else {
+        const localLibs = getLocalLibraries();
+        created = {
+          id: Date.now(),
+          name: newLibraryName.trim(),
+          google_sheet_url: googleSheetUrl.trim(),
+          created_at: new Date().toISOString()
+        };
+        const updated = [...localLibs, created];
+        saveLocalLibraries(updated);
+      }
       onSelectLibrary(created);
     } catch (err) {
-      setError(err.message);
+      console.warn('API unavailable, creating library in localStorage:', err);
+      const localLibs = getLocalLibraries();
+      const created = {
+        id: Date.now(),
+        name: newLibraryName.trim(),
+        google_sheet_url: googleSheetUrl.trim(),
+        created_at: new Date().toISOString()
+      };
+      const updated = [...localLibs, created];
+      saveLocalLibraries(updated);
+      onSelectLibrary(created);
     }
   };
 

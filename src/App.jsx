@@ -10,8 +10,18 @@ import BookDetailModal from './components/BookDetailModal';
 import { Scan, BookPlus, Table, Sparkles, Filter, Library, Search } from 'lucide-react';
 
 export default function App() {
-  const [role, setRole] = useState(null); // 'librarian' | 'reader' | null
-  const [currentLibrary, setCurrentLibrary] = useState(null);
+  const [role, setRole] = useState(() => {
+    return localStorage.getItem('knihovnicka_role') || null;
+  }); // 'librarian' | 'reader' | null
+
+  const [currentLibrary, setCurrentLibrary] = useState(() => {
+    try {
+      const saved = localStorage.getItem('knihovnicka_currentLibrary');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [showLibraryModal, setShowLibraryModal] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showScannerModal, setShowScannerModal] = useState(false);
@@ -37,6 +47,23 @@ export default function App() {
     }
   }, [currentLibrary]);
 
+  const getLocalBooks = (libraryId) => {
+    try {
+      const saved = localStorage.getItem(`knihovnicka_books_${libraryId}`);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const saveLocalBooks = (libraryId, booksList) => {
+    try {
+      localStorage.setItem(`knihovnicka_books_${libraryId}`, JSON.stringify(booksList));
+    } catch (e) {
+      console.error('Error saving books to localStorage:', e);
+    }
+  };
+
   const fetchBooks = async () => {
     if (!currentLibrary) return;
     setLoadingBooks(true);
@@ -45,17 +72,39 @@ export default function App() {
       if (res.ok) {
         const data = await res.json();
         setBooks(data);
+        saveLocalBooks(currentLibrary.id, data);
+      } else {
+        setBooks(getLocalBooks(currentLibrary.id));
       }
     } catch (err) {
       console.error('Chyba při načítání knih:', err);
+      setBooks(getLocalBooks(currentLibrary.id));
     } finally {
       setLoadingBooks(false);
     }
   };
 
+  useEffect(() => {
+    if (role) {
+      localStorage.setItem('knihovnicka_role', role);
+    } else {
+      localStorage.removeItem('knihovnicka_role');
+    }
+  }, [role]);
+
+  useEffect(() => {
+    if (currentLibrary) {
+      localStorage.setItem('knihovnicka_currentLibrary', JSON.stringify(currentLibrary));
+    } else {
+      localStorage.removeItem('knihovnicka_currentLibrary');
+    }
+  }, [currentLibrary]);
+
   const handleSelectRole = (selectedRole) => {
     setRole(selectedRole);
-    setShowLibraryModal(true);
+    if (!currentLibrary) {
+      setShowLibraryModal(true);
+    }
   };
 
   const handleSelectLibrary = (library) => {
@@ -96,17 +145,45 @@ export default function App() {
         });
       }
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Uložení knihy selhalo');
+      if (res && res.ok) {
+        setShowBookFormModal(false);
+        setScannedBookData(null);
+        setEditingBook(null);
+        await fetchBooks();
+      } else {
+        throw new Error('Uložení knihy selhalo');
       }
-
+    } catch (err) {
+      console.warn('Backend save failed or offline, updating localStorage:', err);
+      // Fallback for localStorage
+      const currentBooks = getLocalBooks(currentLibrary.id);
+      let updatedBooks;
+      if (editingBook) {
+        updatedBooks = currentBooks.map((b) =>
+          b.id === editingBook.id ? { ...b, ...formData } : b
+        );
+      } else {
+        const newBook = {
+          id: Date.now(),
+          library_id: currentLibrary.id,
+          isbn: formData.isbn || '',
+          title: formData.title || '',
+          author: formData.author || '',
+          year: formData.year || '',
+          genre: formData.genre || '',
+          target_age: formData.target_age || 'Všechny věkové kategorie',
+          language: formData.language || 'Čeština',
+          status: formData.status || 'Dostupná',
+          notes: formData.notes || '',
+          scanned_at: new Date().toISOString()
+        };
+        updatedBooks = [newBook, ...currentBooks];
+      }
+      saveLocalBooks(currentLibrary.id, updatedBooks);
+      setBooks(updatedBooks);
       setShowBookFormModal(false);
       setScannedBookData(null);
       setEditingBook(null);
-      await fetchBooks();
-    } catch (err) {
-      throw err;
     }
   };
 
@@ -121,9 +198,19 @@ export default function App() {
 
       if (res.ok) {
         await fetchBooks();
+        return;
       }
     } catch (err) {
-      console.error('Chyba při změně stavu knihy:', err);
+      console.error('Chyba při změně stavu knihy, updating local storage:', err);
+    }
+    // Fallback if fetch fails or offline
+    if (currentLibrary) {
+      const currentBooks = getLocalBooks(currentLibrary.id);
+      const updatedBooks = currentBooks.map((b) =>
+        b.id === book.id ? { ...b, status: newStatus } : b
+      );
+      saveLocalBooks(currentLibrary.id, updatedBooks);
+      setBooks(updatedBooks);
     }
   };
 
@@ -135,9 +222,17 @@ export default function App() {
       });
       if (res.ok) {
         await fetchBooks();
+        return;
       }
     } catch (err) {
-      console.error('Chyba při mazání knihy:', err);
+      console.error('Chyba při mazání knihy, updating local storage:', err);
+    }
+    // Fallback if fetch fails or offline
+    if (currentLibrary) {
+      const currentBooks = getLocalBooks(currentLibrary.id);
+      const updatedBooks = currentBooks.filter((b) => b.id !== bookId);
+      saveLocalBooks(currentLibrary.id, updatedBooks);
+      setBooks(updatedBooks);
     }
   };
 
