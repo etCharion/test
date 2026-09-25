@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, BookOpen, Search, Library, Table } from 'lucide-react';
+import { BookMarked, BookOpen, Search, Library, Table } from 'lucide-react';
 
 export default function Navbar({
   onOpenSidebar,
@@ -12,14 +12,14 @@ export default function Navbar({
   return (
     <header className="bg-[#5c3a21] text-[#efe6d5] sticky top-0 z-30 shadow-md border-b-2 border-[#8b2626]">
       <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-        {/* Left Side: Hamburger Menu & App Title */}
+        {/* Left Side: Category Menu (Book icon) & App Title */}
         <div className="flex items-center space-x-3">
           <button
             onClick={onOpenSidebar}
-            className="p-2 hover:bg-[#3a2212] text-[#efe6d5] hover:text-white rounded-xl transition-colors cursor-pointer"
-            title="Otevřít menu kategorií"
+            className="p-2 bg-[#8b2626] hover:bg-[#701e1e] text-white rounded-xl transition-colors cursor-pointer flex items-center space-x-1 shadow-sm"
+            title="Otevřít menu kategorií a filtrů"
           >
-            <Menu className="w-6 h-6" />
+            <BookMarked className="w-6 h-6" />
           </button>
 
           <div className="flex items-center space-x-2">

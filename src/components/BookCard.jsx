@@ -1,7 +1,7 @@
 import React from 'react';
 import { Book, User, Calendar, Tag, CheckCircle2, Clock, Trash2, Edit3, Globe, Users } from 'lucide-react';
 
-export default function BookCard({ book, role, onToggleStatus, onClickDetail, onDelete }) {
+export default function BookCard({ book, role, onToggleStatus, onClickDetail, onEdit, onDelete }) {
   const isAvailable = book.status === 'Dostupná';
 
   return (
@@ -91,15 +91,27 @@ export default function BookCard({ book, role, onToggleStatus, onClickDetail, on
               {isAvailable ? 'Označit jako Půjčenou' : 'Označit jako Dostupnou'}
             </button>
 
-            {onDelete && (
-              <button
-                onClick={() => onDelete(book.id)}
-                className="p-1.5 text-red-700 hover:bg-red-100 rounded-lg transition-colors cursor-pointer"
-                title="Smazat knihu"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            )}
+            <div className="flex items-center space-x-1">
+              {onEdit && (
+                <button
+                  onClick={() => onEdit(book)}
+                  className="p-1.5 text-[#5c3a21] hover:bg-[#d7ccc8] rounded-lg transition-colors cursor-pointer"
+                  title="Upravit informace o knize"
+                >
+                  <Edit3 className="w-4 h-4" />
+                </button>
+              )}
+
+              {onDelete && (
+                <button
+                  onClick={() => onDelete(book.id)}
+                  className="p-1.5 text-red-700 hover:bg-red-100 rounded-lg transition-colors cursor-pointer"
+                  title="Smazat knihu"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           <div className="text-xs text-[#7d5d42] italic">

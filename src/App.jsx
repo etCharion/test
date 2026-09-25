@@ -19,10 +19,14 @@ export default function App() {
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   const [scannedBookData, setScannedBookData] = useState(null);
+  const [editingBook, setEditingBook] = useState(null);
   const [selectedBookForDetail, setSelectedBookForDetail] = useState(null);
 
   const [books, setBooks] = useState([]);
   const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'Dostupná' | 'Půjčená'
+  const [selectedGenreFilter, setSelectedGenreFilter] = useState('all');
+  const [selectedAgeFilter, setSelectedAgeFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'title' | 'author' | 'year'
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingBooks, setLoadingBooks] = useState(false);
 
@@ -61,18 +65,36 @@ export default function App() {
 
   const handleBookFoundFromScanner = (bookData) => {
     setScannedBookData(bookData);
+    setEditingBook(null);
     setShowScannerModal(false);
+    setShowBookFormModal(true);
+  };
+
+  const handleEditBookClick = (book) => {
+    setEditingBook(book);
+    setScannedBookData(book);
     setShowBookFormModal(true);
   };
 
   const handleSaveBook = async (formData) => {
     if (!currentLibrary) return;
     try {
-      const res = await fetch(`/api/libraries/${currentLibrary.id}/books`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
+      let res;
+      if (editingBook) {
+        // Update existing book
+        res = await fetch(`/api/books/${editingBook.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+      } else {
+        // Create new book
+        res = await fetch(`/api/libraries/${currentLibrary.id}/books`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+      }
 
       if (!res.ok) {
         const err = await res.json();
@@ -81,6 +103,7 @@ export default function App() {
 
       setShowBookFormModal(false);
       setScannedBookData(null);
+      setEditingBook(null);
       await fetchBooks();
     } catch (err) {
       throw err;
@@ -118,22 +141,53 @@ export default function App() {
     }
   };
 
-  // Filtered books list calculation
-  const filteredBooks = books.filter((b) => {
-    if (activeFilter === 'Dostupná' && b.status !== 'Dostupná') return false;
-    if (activeFilter === 'Půjčená' && b.status !== 'Půjčená') return false;
+  // Unique genres & age groups present in current library
+  const availableGenres = Array.from(
+    new Set(books.map((b) => b.genre).filter(Boolean))
+  ).sort();
 
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchTitle = (b.title || '').toLowerCase().includes(q);
-      const matchAuthor = (b.author || '').toLowerCase().includes(q);
-      const matchIsbn = (b.isbn || '').toLowerCase().includes(q);
-      const matchGenre = (b.genre || '').toLowerCase().includes(q);
-      return matchTitle || matchAuthor || matchIsbn || matchGenre;
-    }
+  const availableAgeGroups = Array.from(
+    new Set(books.map((b) => b.target_age).filter(Boolean))
+  ).sort();
 
-    return true;
-  });
+  // Filtered and sorted books list calculation
+  const filteredBooks = books
+    .filter((b) => {
+      if (activeFilter === 'Dostupná' && b.status !== 'Dostupná') return false;
+      if (activeFilter === 'Půjčená' && b.status !== 'Půjčená') return false;
+
+      if (selectedGenreFilter !== 'all' && b.genre !== selectedGenreFilter) {
+        return false;
+      }
+
+      if (selectedAgeFilter !== 'all' && b.target_age !== selectedAgeFilter) {
+        return false;
+      }
+
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchTitle = (b.title || '').toLowerCase().includes(q);
+        const matchAuthor = (b.author || '').toLowerCase().includes(q);
+        const matchIsbn = (b.isbn || '').toLowerCase().includes(q);
+        const matchGenre = (b.genre || '').toLowerCase().includes(q);
+        return matchTitle || matchAuthor || matchIsbn || matchGenre;
+      }
+
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'title') {
+        return (a.title || '').localeCompare(b.title || '');
+      }
+      if (sortBy === 'author') {
+        return (a.author || '').localeCompare(b.author || '');
+      }
+      if (sortBy === 'year') {
+        return (parseInt(b.year) || 0) - (parseInt(a.year) || 0);
+      }
+      // 'newest' default (by id descending)
+      return b.id - a.id;
+    });
 
   const availableCount = books.filter((b) => b.status === 'Dostupná').length;
   const borrowedCount = books.filter((b) => b.status === 'Půjčená').length;
@@ -207,28 +261,28 @@ export default function App() {
           </div>
         )}
 
-        {/* Active Filter Bar & Stats */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <div className="flex items-center space-x-2 text-xs font-bold text-[#5c3a21]">
+        {/* Active Filter Bar & Sorting */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 bg-[#efe6d5] p-3.5 rounded-2xl border border-[#d7ccc8]">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-[#5c3a21]">
             <Filter className="w-4 h-4 text-[#8b2626]" />
-            <span>Filtrovat:</span>
+            <span>Filtry:</span>
             <div className="flex space-x-1">
               <button
                 onClick={() => setActiveFilter('all')}
                 className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                   activeFilter === 'all'
                     ? 'bg-[#8b2626] text-white font-bold'
-                    : 'bg-[#efe6d5] text-[#3a2212] hover:bg-[#e8ddc8]'
+                    : 'bg-[#f7f3ed] text-[#3a2212] hover:bg-[#e8ddc8]'
                 }`}
               >
-                Všechny ({books.length})
+                Vše ({books.length})
               </button>
               <button
                 onClick={() => setActiveFilter('Dostupná')}
                 className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                   activeFilter === 'Dostupná'
                     ? 'bg-[#8b2626] text-white font-bold'
-                    : 'bg-[#efe6d5] text-[#3a2212] hover:bg-[#e8ddc8]'
+                    : 'bg-[#f7f3ed] text-[#3a2212] hover:bg-[#e8ddc8]'
                 }`}
               >
                 Dostupné ({availableCount})
@@ -238,7 +292,7 @@ export default function App() {
                 className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                   activeFilter === 'Půjčená'
                     ? 'bg-[#8b2626] text-white font-bold'
-                    : 'bg-[#efe6d5] text-[#3a2212] hover:bg-[#e8ddc8]'
+                    : 'bg-[#f7f3ed] text-[#3a2212] hover:bg-[#e8ddc8]'
                 }`}
               >
                 Půjčené ({borrowedCount})
@@ -246,17 +300,33 @@ export default function App() {
             </div>
           </div>
 
-          {currentLibrary?.google_sheet_url && role === 'librarian' && (
-            <a
-              href={currentLibrary.google_sheet_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-[#2e6f40] font-bold hover:underline flex items-center space-x-1 cursor-pointer"
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Genre filter dropdown */}
+            {availableGenres.length > 0 && (
+              <select
+                value={selectedGenreFilter}
+                onChange={(e) => setSelectedGenreFilter(e.target.value)}
+                className="bg-[#f7f3ed] border border-[#a1887f] text-[#3a2212] text-xs font-semibold px-2.5 py-1.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8b2626]"
+              >
+                <option value="all">Všechny žánry</option>
+                {availableGenres.map((g) => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
+            )}
+
+            {/* Sort selector */}
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-[#f7f3ed] border border-[#a1887f] text-[#3a2212] text-xs font-semibold px-2.5 py-1.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8b2626]"
             >
-              <Table className="w-4 h-4" />
-              <span>Přístup k propojené Google Tabulce ↗</span>
-            </a>
-          )}
+              <option value="newest">Nejnovější</option>
+              <option value="title">Název A-Z</option>
+              <option value="author">Autor A-Z</option>
+              <option value="year">Rok vydání</option>
+            </select>
+          </div>
         </div>
 
         {/* Books Grid */}
@@ -300,6 +370,7 @@ export default function App() {
                   setSelectedBookForDetail(b);
                   setShowDetailModal(true);
                 }}
+                onEdit={role === 'librarian' ? handleEditBookClick : null}
                 onDelete={role === 'librarian' ? handleDeleteBook : null}
               />
             ))}
@@ -321,6 +392,14 @@ export default function App() {
         onClose={() => setShowSidebar(false)}
         activeFilter={activeFilter}
         onSelectFilter={setActiveFilter}
+        selectedGenreFilter={selectedGenreFilter}
+        onSelectGenreFilter={setSelectedGenreFilter}
+        selectedAgeFilter={selectedAgeFilter}
+        onSelectAgeFilter={setSelectedAgeFilter}
+        sortBy={sortBy}
+        onSelectSortBy={setSortBy}
+        availableGenres={availableGenres}
+        availableAgeGroups={availableAgeGroups}
         currentLibrary={currentLibrary}
         role={role}
         onChangeLibraryClick={() => setShowLibraryModal(true)}
@@ -353,6 +432,7 @@ export default function App() {
         onClose={() => setShowDetailModal(false)}
         role={role}
         onToggleStatus={handleToggleStatus}
+        onEdit={role === 'librarian' ? handleEditBookClick : null}
         onDelete={role === 'librarian' ? handleDeleteBook : null}
       />
     </div>
