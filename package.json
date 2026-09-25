@@ -8,6 +8,8 @@
     "client": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "test": "NODE_ENV=test node --test server/tests/*.test.mjs"
   },
   "dependencies": {
@@ -27,6 +29,7 @@
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^9.1.2",
+    "gh-pages": "^6.3.0",
     "tailwindcss": "^4.0.7",
     "vite": "^6.1.0"
   }
