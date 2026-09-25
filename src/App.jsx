@@ -9,6 +9,46 @@ import BookCard from './components/BookCard';
 import BookDetailModal from './components/BookDetailModal';
 import { Scan, BookPlus, Table, Sparkles, Filter, Library, Search } from 'lucide-react';
 
+const DEFAULT_LIBRARIES = [
+  {
+    id: 1,
+    name: 'Moje Domácí Knihovna',
+    google_sheet_url: '',
+    created_at: new Date().toISOString()
+  }
+];
+
+const DEFAULT_BOOKS = [
+  {
+    id: 1,
+    library_id: 1,
+    isbn: '9788000000001',
+    title: 'Babička',
+    author: 'Božena Němcová',
+    year: '1855',
+    genre: 'Klasická literatura',
+    target_age: 'Všechny věkové kategorie',
+    language: 'Čeština',
+    status: 'Dostupná',
+    notes: 'Kniha v pevných deskách.',
+    scanned_at: new Date().toISOString()
+  },
+  {
+    id: 2,
+    library_id: 1,
+    isbn: '9788020400002',
+    title: 'Malý princ',
+    author: 'Antoine de Saint-Exupéry',
+    year: '1943',
+    genre: 'Pohádka / Filosofie',
+    target_age: 'Děti (0-12 let)',
+    language: 'Čeština',
+    status: 'Dostupná',
+    notes: 'Ilustrované vydání.',
+    scanned_at: new Date().toISOString()
+  }
+];
+
 export default function App() {
   const [role, setRole] = useState(() => {
     return localStorage.getItem('knihovnicka_role') || null;
@@ -17,11 +57,18 @@ export default function App() {
   const [currentLibrary, setCurrentLibrary] = useState(() => {
     try {
       const saved = localStorage.getItem('knihovnicka_currentLibrary');
-      return saved ? JSON.parse(saved) : null;
-    } catch (e) {
-      return null;
-    }
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    // Ensure default libraries exist in localStorage
+    try {
+      const existingLibs = localStorage.getItem('knihovnicka_libraries');
+      if (!existingLibs) {
+        localStorage.setItem('knihovnicka_libraries', JSON.stringify(DEFAULT_LIBRARIES));
+      }
+    } catch (e) {}
+    return DEFAULT_LIBRARIES[0];
   });
+
   const [showLibraryModal, setShowLibraryModal] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showScannerModal, setShowScannerModal] = useState(false);
@@ -40,50 +87,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingBooks, setLoadingBooks] = useState(false);
 
-  // Fetch books when current library changes
-  useEffect(() => {
-    if (currentLibrary) {
-      fetchBooks();
-    }
-  }, [currentLibrary]);
-
-  const getLocalBooks = (libraryId) => {
-    try {
-      const saved = localStorage.getItem(`knihovnicka_books_${libraryId}`);
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  };
-
-  const saveLocalBooks = (libraryId, booksList) => {
-    try {
-      localStorage.setItem(`knihovnicka_books_${libraryId}`, JSON.stringify(booksList));
-    } catch (e) {
-      console.error('Error saving books to localStorage:', e);
-    }
-  };
-
-  const fetchBooks = async () => {
-    if (!currentLibrary) return;
-    setLoadingBooks(true);
-    try {
-      const res = await fetch(`/api/libraries/${currentLibrary.id}/books`);
-      if (res.ok) {
-        const data = await res.json();
-        setBooks(data);
-        saveLocalBooks(currentLibrary.id, data);
-      } else {
-        setBooks(getLocalBooks(currentLibrary.id));
-      }
-    } catch (err) {
-      console.error('Chyba při načítání knih:', err);
-      setBooks(getLocalBooks(currentLibrary.id));
-    } finally {
-      setLoadingBooks(false);
-    }
-  };
-
+  // Sync role to localStorage
   useEffect(() => {
     if (role) {
       localStorage.setItem('knihovnicka_role', role);
@@ -92,13 +96,44 @@ export default function App() {
     }
   }, [role]);
 
+  // Sync current library to localStorage
   useEffect(() => {
     if (currentLibrary) {
       localStorage.setItem('knihovnicka_currentLibrary', JSON.stringify(currentLibrary));
-    } else {
-      localStorage.removeItem('knihovnicka_currentLibrary');
+      loadBooksForLibrary(currentLibrary.id);
     }
   }, [currentLibrary]);
+
+  const loadBooksForLibrary = (libraryId) => {
+    setLoadingBooks(true);
+    try {
+      const storageKey = `knihovnicka_books_${libraryId}`;
+      const savedBooks = localStorage.getItem(storageKey);
+      if (savedBooks) {
+        setBooks(JSON.parse(savedBooks));
+      } else {
+        // Initialize default books if this is the default library
+        const initialBooks = libraryId === 1 ? DEFAULT_BOOKS : [];
+        localStorage.setItem(storageKey, JSON.stringify(initialBooks));
+        setBooks(initialBooks);
+      }
+    } catch (err) {
+      console.error('Error reading books from localStorage:', err);
+      setBooks([]);
+    } finally {
+      setLoadingBooks(false);
+    }
+  };
+
+  const saveBooksForLibrary = (libraryId, booksArray) => {
+    try {
+      const storageKey = `knihovnicka_books_${libraryId}`;
+      localStorage.setItem(storageKey, JSON.stringify(booksArray));
+      setBooks(booksArray);
+    } catch (err) {
+      console.error('Error saving books to localStorage:', err);
+    }
+  };
 
   const handleSelectRole = (selectedRole) => {
     setRole(selectedRole);
@@ -127,113 +162,50 @@ export default function App() {
 
   const handleSaveBook = async (formData) => {
     if (!currentLibrary) return;
-    try {
-      let res;
-      if (editingBook) {
-        // Update existing book
-        res = await fetch(`/api/books/${editingBook.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        });
-      } else {
-        // Create new book
-        res = await fetch(`/api/libraries/${currentLibrary.id}/books`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        });
-      }
 
-      if (res && res.ok) {
-        setShowBookFormModal(false);
-        setScannedBookData(null);
-        setEditingBook(null);
-        await fetchBooks();
-      } else {
-        throw new Error('Uložení knihy selhalo');
-      }
-    } catch (err) {
-      console.warn('Backend save failed or offline, updating localStorage:', err);
-      // Fallback for localStorage
-      const currentBooks = getLocalBooks(currentLibrary.id);
-      let updatedBooks;
-      if (editingBook) {
-        updatedBooks = currentBooks.map((b) =>
-          b.id === editingBook.id ? { ...b, ...formData } : b
-        );
-      } else {
-        const newBook = {
-          id: Date.now(),
-          library_id: currentLibrary.id,
-          isbn: formData.isbn || '',
-          title: formData.title || '',
-          author: formData.author || '',
-          year: formData.year || '',
-          genre: formData.genre || '',
-          target_age: formData.target_age || 'Všechny věkové kategorie',
-          language: formData.language || 'Čeština',
-          status: formData.status || 'Dostupná',
-          notes: formData.notes || '',
-          scanned_at: new Date().toISOString()
-        };
-        updatedBooks = [newBook, ...currentBooks];
-      }
-      saveLocalBooks(currentLibrary.id, updatedBooks);
-      setBooks(updatedBooks);
-      setShowBookFormModal(false);
-      setScannedBookData(null);
-      setEditingBook(null);
-    }
-  };
-
-  const handleToggleStatus = async (book) => {
-    const newStatus = book.status === 'Dostupná' ? 'Půjčená' : 'Dostupná';
-    try {
-      const res = await fetch(`/api/books/${book.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
-
-      if (res.ok) {
-        await fetchBooks();
-        return;
-      }
-    } catch (err) {
-      console.error('Chyba při změně stavu knihy, updating local storage:', err);
-    }
-    // Fallback if fetch fails or offline
-    if (currentLibrary) {
-      const currentBooks = getLocalBooks(currentLibrary.id);
-      const updatedBooks = currentBooks.map((b) =>
-        b.id === book.id ? { ...b, status: newStatus } : b
+    let updatedBooks;
+    if (editingBook) {
+      updatedBooks = books.map((b) =>
+        b.id === editingBook.id ? { ...b, ...formData } : b
       );
-      saveLocalBooks(currentLibrary.id, updatedBooks);
-      setBooks(updatedBooks);
+    } else {
+      const newBook = {
+        id: Date.now(),
+        library_id: currentLibrary.id,
+        isbn: formData.isbn || '',
+        title: formData.title || '',
+        author: formData.author || '',
+        year: formData.year || '',
+        genre: formData.genre || '',
+        target_age: formData.target_age || 'Všechny věkové kategorie',
+        language: formData.language || 'Čeština',
+        status: formData.status || 'Dostupná',
+        notes: formData.notes || '',
+        scanned_at: new Date().toISOString()
+      };
+      updatedBooks = [newBook, ...books];
     }
+
+    saveBooksForLibrary(currentLibrary.id, updatedBooks);
+    setShowBookFormModal(false);
+    setScannedBookData(null);
+    setEditingBook(null);
   };
 
-  const handleDeleteBook = async (bookId) => {
+  const handleToggleStatus = (book) => {
+    if (!currentLibrary) return;
+    const newStatus = book.status === 'Dostupná' ? 'Půjčená' : 'Dostupná';
+    const updatedBooks = books.map((b) =>
+      b.id === book.id ? { ...b, status: newStatus } : b
+    );
+    saveBooksForLibrary(currentLibrary.id, updatedBooks);
+  };
+
+  const handleDeleteBook = (bookId) => {
+    if (!currentLibrary) return;
     if (!window.confirm('Opravdu chcete tuto knihu smazat z knihovny?')) return;
-    try {
-      const res = await fetch(`/api/books/${bookId}`, {
-        method: 'DELETE'
-      });
-      if (res.ok) {
-        await fetchBooks();
-        return;
-      }
-    } catch (err) {
-      console.error('Chyba při mazání knihy, updating local storage:', err);
-    }
-    // Fallback if fetch fails or offline
-    if (currentLibrary) {
-      const currentBooks = getLocalBooks(currentLibrary.id);
-      const updatedBooks = currentBooks.filter((b) => b.id !== bookId);
-      saveLocalBooks(currentLibrary.id, updatedBooks);
-      setBooks(updatedBooks);
-    }
+    const updatedBooks = books.filter((b) => b.id !== bookId);
+    saveBooksForLibrary(currentLibrary.id, updatedBooks);
   };
 
   // Unique genres & age groups present in current library
@@ -505,6 +477,7 @@ export default function App() {
         totalCount={books.length}
         availableCount={availableCount}
         borrowedCount={borrowedCount}
+        books={books}
       />
 
       <ScannerModal
