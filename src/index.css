@@ -4,16 +4,16 @@
   --font-serif: 'Merriweather', serif;
   --font-sans: 'Plus Jakarta Sans', sans-serif;
 
-  --color-cozy-cream: #f7f3ed;
-  --color-cozy-paper: #f0e8d9;
-  --color-cozy-card: #e8ddc8;
-  --color-cozy-brown: #5c3a21;
-  --color-cozy-dark: #3a2212;
-  --color-cozy-burgundy: #8b2626;
-  --color-cozy-burgundy-hover: #701e1e;
-  --color-cozy-gold: #c59b27;
-  --color-cozy-amber: #d97706;
-  --color-cozy-green: #2e6f40;
+  --color-cozy-cream: #f4f8fb;
+  --color-cozy-paper: #edf5f8;
+  --color-cozy-card: #d5e5ed;
+  --color-cozy-brown: #264653;
+  --color-cozy-dark: #102a43;
+  --color-cozy-burgundy: #0f766e;
+  --color-cozy-burgundy-hover: #115e59;
+  --color-cozy-gold: #e9a23b;
+  --color-cozy-amber: #c77815;
+  --color-cozy-green: #2f855a;
 }
 
 body {
@@ -28,12 +28,12 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #efe6d5;
+  background: #e8f1f5;
 }
 ::-webkit-scrollbar-thumb {
-  background: #a1887f;
+  background: #7895a6;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #8d6e63;
+  background: #587486;
 }
