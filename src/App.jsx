@@ -265,7 +265,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f3ed] flex flex-col font-sans">
+    <div className="min-h-screen bg-[#f4f8fb] flex flex-col font-sans">
       {/* Top Navbar */}
       <Navbar
         onOpenSidebar={() => setShowSidebar(true)}
@@ -280,24 +280,24 @@ export default function App() {
       <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 space-y-6">
         {/* Librarian Header & Big Scan Button */}
         {role === 'librarian' && (
-          <div className="bg-[#efe6d5] border-2 border-[#8b2626]/20 rounded-3xl p-6 shadow-md text-center relative overflow-hidden my-2">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#8b2626]/5 rounded-full -mr-10 -mt-10 pointer-events-none"></div>
+          <div className="bg-[#e8f1f5] border-2 border-[#0f766e]/20 rounded-3xl p-6 shadow-md text-center relative overflow-hidden my-2">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#0f766e]/5 rounded-full -mr-10 -mt-10 pointer-events-none"></div>
 
             <div className="max-w-md mx-auto">
-              <span className="inline-block text-xs font-bold text-[#8b2626] uppercase tracking-wider bg-[#8b2626]/10 px-3 py-1 rounded-full mb-3">
+              <span className="inline-block text-xs font-bold text-[#0f766e] uppercase tracking-wider bg-[#0f766e]/10 px-3 py-1 rounded-full mb-3">
                 Rychlé skenování knih do knihovny
               </span>
-              <h2 className="text-2xl font-serif font-bold text-[#3a2212] mb-1">
+              <h2 className="text-2xl font-serif font-bold text-[#102a43] mb-1">
                 Přidat novou knihu
               </h2>
-              <p className="text-xs text-[#5c3a21] mb-6">
+              <p className="text-xs text-[#264653] mb-6">
                 Naskenujte čárový kód čtečkou/fotoaparátem nebo zadejte kód ISBN
               </p>
 
               {/* BIG CENTRAL SCAN BUTTON */}
               <button
                 onClick={() => setShowScannerModal(true)}
-                className="w-full max-w-xs mx-auto py-4 px-6 bg-[#8b2626] hover:bg-[#701e1e] active:scale-95 text-white font-bold text-lg rounded-2xl shadow-xl flex items-center justify-center space-x-3 transition-all cursor-pointer group"
+                className="w-full max-w-xs mx-auto py-4 px-6 bg-[#0f766e] hover:bg-[#115e59] active:scale-95 text-white font-bold text-lg rounded-2xl shadow-xl flex items-center justify-center space-x-3 transition-all cursor-pointer group"
               >
                 <Scan className="w-8 h-8 group-hover:scale-110 transition-transform" />
                 <span>Naskenovat</span>
@@ -308,19 +308,19 @@ export default function App() {
 
         {/* Reader Header Banner */}
         {role === 'reader' && (
-          <div className="bg-[#efe6d5] border border-[#d7ccc8] rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="bg-[#e8f1f5] border border-[#c5d9e4] rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
             <div>
-              <h2 className="text-xl font-serif font-bold text-[#3a2212]">
+              <h2 className="text-xl font-serif font-bold text-[#102a43]">
                 Katalog knihovny: {currentLibrary?.name || 'Vyberte knihovnu'}
               </h2>
-              <p className="text-xs text-[#5c3a21] mt-0.5">
+              <p className="text-xs text-[#264653] mt-0.5">
                 Prohlížejte si knižní fond a aktuální dostupnost výpůjček
               </p>
             </div>
 
             <button
               onClick={() => setShowLibraryModal(true)}
-              className="px-4 py-2 bg-[#5c3a21] hover:bg-[#3a2212] text-white text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors cursor-pointer shrink-0"
+              className="px-4 py-2 bg-[#264653] hover:bg-[#102a43] text-white text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors cursor-pointer shrink-0"
             >
               <Library className="w-4 h-4" />
               <span>Vybrat jinou knihovnu</span>
@@ -329,17 +329,17 @@ export default function App() {
         )}
 
         {/* Active Filter Bar & Sorting */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 bg-[#efe6d5] p-3.5 rounded-2xl border border-[#d7ccc8]">
-          <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-[#5c3a21]">
-            <Filter className="w-4 h-4 text-[#8b2626]" />
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 bg-[#e8f1f5] p-3.5 rounded-2xl border border-[#c5d9e4]">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-[#264653]">
+            <Filter className="w-4 h-4 text-[#0f766e]" />
             <span>Filtry:</span>
             <div className="flex space-x-1">
               <button
                 onClick={() => setActiveFilter('all')}
                 className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                   activeFilter === 'all'
-                    ? 'bg-[#8b2626] text-white font-bold'
-                    : 'bg-[#f7f3ed] text-[#3a2212] hover:bg-[#e8ddc8]'
+                    ? 'bg-[#0f766e] text-white font-bold'
+                    : 'bg-[#f4f8fb] text-[#102a43] hover:bg-[#d5e5ed]'
                 }`}
               >
                 Vše ({books.length})
@@ -348,8 +348,8 @@ export default function App() {
                 onClick={() => setActiveFilter('Dostupná')}
                 className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                   activeFilter === 'Dostupná'
-                    ? 'bg-[#8b2626] text-white font-bold'
-                    : 'bg-[#f7f3ed] text-[#3a2212] hover:bg-[#e8ddc8]'
+                    ? 'bg-[#0f766e] text-white font-bold'
+                    : 'bg-[#f4f8fb] text-[#102a43] hover:bg-[#d5e5ed]'
                 }`}
               >
                 Dostupné ({availableCount})
@@ -358,8 +358,8 @@ export default function App() {
                 onClick={() => setActiveFilter('Půjčená')}
                 className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                   activeFilter === 'Půjčená'
-                    ? 'bg-[#8b2626] text-white font-bold'
-                    : 'bg-[#f7f3ed] text-[#3a2212] hover:bg-[#e8ddc8]'
+                    ? 'bg-[#0f766e] text-white font-bold'
+                    : 'bg-[#f4f8fb] text-[#102a43] hover:bg-[#d5e5ed]'
                 }`}
               >
                 Půjčené ({borrowedCount})
@@ -373,7 +373,7 @@ export default function App() {
               <select
                 value={selectedGenreFilter}
                 onChange={(e) => setSelectedGenreFilter(e.target.value)}
-                className="bg-[#f7f3ed] border border-[#a1887f] text-[#3a2212] text-xs font-semibold px-2.5 py-1.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8b2626]"
+                className="bg-[#f4f8fb] border border-[#7895a6] text-[#102a43] text-xs font-semibold px-2.5 py-1.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]"
               >
                 <option value="all">Všechny žánry</option>
                 {availableGenres.map((g) => (
@@ -386,7 +386,7 @@ export default function App() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="bg-[#f7f3ed] border border-[#a1887f] text-[#3a2212] text-xs font-semibold px-2.5 py-1.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8b2626]"
+              className="bg-[#f4f8fb] border border-[#7895a6] text-[#102a43] text-xs font-semibold px-2.5 py-1.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]"
             >
               <option value="newest">Nejnovější</option>
               <option value="title">Název A-Z</option>
@@ -398,19 +398,19 @@ export default function App() {
 
         {/* Books Grid */}
         {loadingBooks ? (
-          <div className="text-center py-16 text-[#5c3a21]">
-            <div className="animate-spin w-8 h-8 border-4 border-[#8b2626] border-t-transparent rounded-full mx-auto mb-3"></div>
+          <div className="text-center py-16 text-[#264653]">
+            <div className="animate-spin w-8 h-8 border-4 border-[#0f766e] border-t-transparent rounded-full mx-auto mb-3"></div>
             <p className="text-sm font-semibold">Načítání knih v knihovně...</p>
           </div>
         ) : filteredBooks.length === 0 ? (
-          <div className="text-center py-16 bg-[#efe6d5] rounded-3xl border-2 border-dashed border-[#a1887f] p-8 max-w-md mx-auto">
-            <div className="p-4 bg-[#8b2626]/10 text-[#8b2626] rounded-2xl inline-block mb-3">
+          <div className="text-center py-16 bg-[#e8f1f5] rounded-3xl border-2 border-dashed border-[#7895a6] p-8 max-w-md mx-auto">
+            <div className="p-4 bg-[#0f766e]/10 text-[#0f766e] rounded-2xl inline-block mb-3">
               <BookPlus className="w-8 h-8" />
             </div>
-            <h3 className="font-serif font-bold text-lg text-[#3a2212] mb-1">
+            <h3 className="font-serif font-bold text-lg text-[#102a43] mb-1">
               Zatím nebyly nalezeny žádné knihy
             </h3>
-            <p className="text-xs text-[#5c3a21] mb-4">
+            <p className="text-xs text-[#264653] mb-4">
               {searchQuery
                 ? 'Pro zadaný vyhledávací dotaz nebyly nalezeny žádné výsledky.'
                 : 'V této knihovně zatím nejsou naskenované žádné knihy.'}
@@ -419,7 +419,7 @@ export default function App() {
             {role === 'librarian' && (
               <button
                 onClick={() => setShowScannerModal(true)}
-                className="px-5 py-2.5 bg-[#8b2626] text-white font-bold rounded-xl text-xs shadow-md cursor-pointer hover:bg-[#701e1e] transition-colors"
+                className="px-5 py-2.5 bg-[#0f766e] text-white font-bold rounded-xl text-xs shadow-md cursor-pointer hover:bg-[#115e59] transition-colors"
               >
                 Naskenovat první knihu
               </button>
