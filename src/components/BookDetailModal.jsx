@@ -8,11 +8,11 @@ export default function BookDetailModal({ book, isOpen, onClose, role, onToggleS
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-      <div className="bg-[#f7f3ed] border-2 border-[#8b2626]/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative overflow-hidden">
+      <div className="bg-[#f4f8fb] border-2 border-[#0f766e]/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative overflow-hidden">
         {/* Header */}
-        <div className="flex items-start justify-between pb-3 border-b border-[#d7ccc8] mb-4">
+        <div className="flex items-start justify-between pb-3 border-b border-[#c5d9e4] mb-4">
           <div className="flex items-center space-x-3">
-            <div className="p-3 bg-[#8b2626] text-white rounded-xl">
+            <div className="p-3 bg-[#0f766e] text-white rounded-xl">
               <Book className="w-6 h-6" />
             </div>
             <div>
@@ -35,74 +35,74 @@ export default function BookDetailModal({ book, isOpen, onClose, role, onToggleS
                   </>
                 )}
               </span>
-              <h2 className="font-serif font-bold text-xl text-[#3a2212] leading-snug">
+              <h2 className="font-serif font-bold text-xl text-[#102a43] leading-snug">
                 {book.title}
               </h2>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 hover:bg-[#efe6d5] text-[#5c3a21] rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 hover:bg-[#e8f1f5] text-[#264653] rounded-lg transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Info Grid */}
-        <div className="space-y-3 text-sm text-[#3a2212] mb-6">
-          <div className="flex items-center space-x-2 bg-[#efe6d5] p-2.5 rounded-xl border border-[#d7ccc8]">
-            <User className="w-4 h-4 text-[#8b2626] shrink-0" />
-            <span className="font-semibold text-xs text-[#5c3a21]">Autor:</span>
+        <div className="space-y-3 text-sm text-[#102a43] mb-6">
+          <div className="flex items-center space-x-2 bg-[#e8f1f5] p-2.5 rounded-xl border border-[#c5d9e4]">
+            <User className="w-4 h-4 text-[#0f766e] shrink-0" />
+            <span className="font-semibold text-xs text-[#264653]">Autor:</span>
             <span className="font-bold">{book.author || 'Neuveden'}</span>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <div className="flex items-center space-x-2 bg-[#efe6d5] p-2.5 rounded-xl border border-[#d7ccc8]">
-              <Calendar className="w-4 h-4 text-[#8b2626] shrink-0" />
-              <span className="font-semibold text-xs text-[#5c3a21]">Rok:</span>
+            <div className="flex items-center space-x-2 bg-[#e8f1f5] p-2.5 rounded-xl border border-[#c5d9e4]">
+              <Calendar className="w-4 h-4 text-[#0f766e] shrink-0" />
+              <span className="font-semibold text-xs text-[#264653]">Rok:</span>
               <span className="font-bold">{book.year || 'Neuveden'}</span>
             </div>
 
-            <div className="flex items-center space-x-2 bg-[#efe6d5] p-2.5 rounded-xl border border-[#d7ccc8]">
-              <Globe className="w-4 h-4 text-[#8b2626] shrink-0" />
-              <span className="font-semibold text-xs text-[#5c3a21]">Jazyk:</span>
+            <div className="flex items-center space-x-2 bg-[#e8f1f5] p-2.5 rounded-xl border border-[#c5d9e4]">
+              <Globe className="w-4 h-4 text-[#0f766e] shrink-0" />
+              <span className="font-semibold text-xs text-[#264653]">Jazyk:</span>
               <span className="font-bold">{book.language || 'Čeština'}</span>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <div className="flex items-center space-x-2 bg-[#efe6d5] p-2.5 rounded-xl border border-[#d7ccc8]">
-              <Tag className="w-4 h-4 text-[#8b2626] shrink-0" />
-              <span className="font-semibold text-xs text-[#5c3a21]">Žánr:</span>
+            <div className="flex items-center space-x-2 bg-[#e8f1f5] p-2.5 rounded-xl border border-[#c5d9e4]">
+              <Tag className="w-4 h-4 text-[#0f766e] shrink-0" />
+              <span className="font-semibold text-xs text-[#264653]">Žánr:</span>
               <span className="font-bold truncate">{book.genre || 'Neuveden'}</span>
             </div>
 
-            <div className="flex items-center space-x-2 bg-[#efe6d5] p-2.5 rounded-xl border border-[#d7ccc8]">
-              <Users className="w-4 h-4 text-[#8b2626] shrink-0" />
-              <span className="font-semibold text-xs text-[#5c3a21]">Věk:</span>
+            <div className="flex items-center space-x-2 bg-[#e8f1f5] p-2.5 rounded-xl border border-[#c5d9e4]">
+              <Users className="w-4 h-4 text-[#0f766e] shrink-0" />
+              <span className="font-semibold text-xs text-[#264653]">Věk:</span>
               <span className="font-bold truncate">{book.target_age || 'Všechny věkové kateg.'}</span>
             </div>
           </div>
 
           {book.isbn && (
-            <div className="flex items-center space-x-2 bg-[#efe6d5] p-2.5 rounded-xl border border-[#d7ccc8]">
-              <Barcode className="w-4 h-4 text-[#8b2626] shrink-0" />
-              <span className="font-semibold text-xs text-[#5c3a21]">ISBN:</span>
+            <div className="flex items-center space-x-2 bg-[#e8f1f5] p-2.5 rounded-xl border border-[#c5d9e4]">
+              <Barcode className="w-4 h-4 text-[#0f766e] shrink-0" />
+              <span className="font-semibold text-xs text-[#264653]">ISBN:</span>
               <span className="font-mono font-bold text-xs">{book.isbn}</span>
             </div>
           )}
 
           {book.notes && (
-            <div className="bg-[#efe6d5] p-3 rounded-xl border border-[#d7ccc8] text-xs">
-              <span className="font-bold text-[#5c3a21] block mb-1">Poznámky:</span>
-              <p className="italic text-[#3a2212]">{book.notes}</p>
+            <div className="bg-[#e8f1f5] p-3 rounded-xl border border-[#c5d9e4] text-xs">
+              <span className="font-bold text-[#264653] block mb-1">Poznámky:</span>
+              <p className="italic text-[#102a43]">{book.notes}</p>
             </div>
           )}
         </div>
 
         {/* Actions for Librarian */}
         {role === 'librarian' ? (
-          <div className="pt-3 border-t border-[#d7ccc8] flex flex-col space-y-2">
+          <div className="pt-3 border-t border-[#c5d9e4] flex flex-col space-y-2">
             <div className="flex space-x-2">
               <button
                 onClick={() => {
@@ -124,9 +124,9 @@ export default function BookDetailModal({ book, isOpen, onClose, role, onToggleS
                     onClose();
                     onEdit(book);
                   }}
-                  className="flex-1 py-2.5 bg-[#efe6d5] hover:bg-[#e8ddc8] text-[#3a2212] border border-[#a1887f] font-bold rounded-xl text-xs flex items-center justify-center space-x-1 cursor-pointer"
+                  className="flex-1 py-2.5 bg-[#e8f1f5] hover:bg-[#d5e5ed] text-[#102a43] border border-[#7895a6] font-bold rounded-xl text-xs flex items-center justify-center space-x-1 cursor-pointer"
                 >
-                  <Edit3 className="w-4 h-4 text-[#8b2626]" />
+                  <Edit3 className="w-4 h-4 text-[#0f766e]" />
                   <span>Upravit informace o knize</span>
                 </button>
               )}
@@ -148,7 +148,7 @@ export default function BookDetailModal({ book, isOpen, onClose, role, onToggleS
         ) : (
           <button
             onClick={onClose}
-            className="w-full py-3 bg-[#8b2626] hover:bg-[#701e1e] text-white font-bold rounded-xl shadow-md text-sm cursor-pointer"
+            className="w-full py-3 bg-[#0f766e] hover:bg-[#115e59] text-white font-bold rounded-xl shadow-md text-sm cursor-pointer"
           >
             Zavřít detail
           </button>
