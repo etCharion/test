@@ -1,15 +1,697 @@
 <!DOCTYPE html>
 <html lang="cs">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Knihovnička - Skenování & Správa Knih</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  </head>
-  <body class="bg-[#f4f8fb] text-[#102a43] font-sans antialiased selection:bg-[#587486] selection:text-white">
-    <div id="root"></div>
-    <script type="module" src="./src/main.jsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hledání min - Minesweeper</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .game-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+        
+        .info-display {
+            background-color: #333;
+            color: #ff0000;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .face-button {
+            background-color: #ddd;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+        
+        .face-button:hover {
+            background-color: #ccc;
+        }
+        
+        .face-button:active {
+            transform: scale(0.95);
+        }
+        
+        .game-board {
+            display: grid;
+            gap: 2px;
+            background-color: #bbb;
+            padding: 2px;
+            border-radius: 5px;
+        }
+        
+        .cell {
+            width: 30px;
+            height: 30px;
+            background-color: #ddd;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+            user-select: none;
+        }
+        
+        .cell:hover {
+            background-color: #ccc;
+        }
+        
+        .cell:active {
+            transform: scale(0.95);
+        }
+        
+        .cell.revealed {
+            background-color: #ddd;
+            cursor: default;
+        }
+        
+        .cell.revealed.empty {
+            background-color: #eee;
+        }
+        
+        .cell.flagged {
+            background-color: #ffcccc;
+        }
+        
+        .cell.mine {
+            background-color: #ff6666;
+            color: #000;
+        }
+        
+        .cell.mine.exploded {
+            background-color: #ff3333;
+            color: #fff;
+        }
+        
+        .cell.number-1 { color: #0000ff; }
+        .cell.number-2 { color: #008000; }
+        .cell.number-3 { color: #ff0000; }
+        .cell.number-4 { color: #000080; }
+        .cell.number-5 { color: #800000; }
+        .cell.number-6 { color: #008080; }
+        .cell.number-7 { color: #000000; }
+        .cell.number-8 { color: #808080; }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .difficulty-btn {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        .difficulty-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .difficulty-btn.active {
+            background-color: #2E7D32;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            max-width: 500px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .modal h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .modal p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .modal-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+        
+        .modal-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .modal-btn.restart {
+            background-color: #f44336;
+        }
+        
+        .modal-btn.restart:hover {
+            background-color: #d32f2f;
+        }
+        
+        @media (max-width: 600px) {
+            .cell {
+                width: 25px;
+                height: 25px;
+                font-size: 14px;
+            }
+            
+            .info-panel {
+                flex-direction: column;
+                gap: 10px;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Hledání min</h1>
+        
+        <div class="info-panel">
+            <div class="info-display" id="mines-left">10</div>
+            <button class="face-button" id="face-btn">😊</button>
+            <div class="info-display" id="timer">000</div>
+        </div>
+        
+        <div class="game-board" id="game-board"></div>
+        
+        <div class="controls">
+            <button class="difficulty-btn" data-difficulty="easy">Snadné (8x8, 10 min)</button>
+            <button class="difficulty-btn" data-difficulty="medium">Střední (12x12, 30 min)</button>
+            <button class="difficulty-btn active" data-difficulty="hard">Těžké (15x15, 50 min)</button>
+            <button class="difficulty-btn" data-difficulty="custom">Vlastní...</button>
+        </div>
+        
+        <div class="instructions">
+            <strong>Ovládání:</strong> Kliknutí levým tlačítkem odhalí políčko, kliknutí pravým tlačítkem umístí vlajku.
+        </div>
+    </div>
+    
+    <!-- Modal pro výhru/prohru -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Vyhrál jsi!</h2>
+            <p id="modal-message">Gratuluji! Všechny miny jsi našel bez výbuchu.</p>
+            <button class="modal-btn restart" onclick="restartGame()">Hrát znovu</button>
+        </div>
+    </div>
+    
+    <!-- Modal pro vlastní nastavení -->
+    <div class="modal" id="custom-modal">
+        <div class="modal-content">
+            <h2>Vlastní nastavení</h2>
+            <div style="margin: 20px 0; text-align: left;">
+                <label for="custom-rows" style="display: block; margin-bottom: 5px;">Počet řádků:</label>
+                <input type="number" id="custom-rows" value="15" min="5" max="30" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px;">
+                
+                <label for="custom-cols" style="display: block; margin-bottom: 5px;">Počet sloupců:</label>
+                <input type="number" id="custom-cols" value="15" min="5" max="30" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px;">
+                
+                <label for="custom-mines" style="display: block; margin-bottom: 5px;">Počet min:</label>
+                <input type="number" id="custom-mines" value="50" min="1" max="500" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px;">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="modal-btn" onclick="startCustomGame()">Potvrdit</button>
+                <button class="modal-btn" onclick="closeCustomModal()">Zrušit</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Hrací proměnné
+        let boardSize = 15;
+        let totalMines = 50;
+        let board = [];
+        let gameBoard = document.getElementById('game-board');
+        let minesLeftDisplay = document.getElementById('mines-left');
+        let timerDisplay = document.getElementById('timer');
+        let faceBtn = document.getElementById('face-btn');
+        let modal = document.getElementById('modal');
+        let customModal = document.getElementById('custom-modal');
+        let modalTitle = document.getElementById('modal-title');
+        let modalMessage = document.getElementById('modal-message');
+        
+        let gameStarted = false;
+        let gameOver = false;
+        let timerInterval = null;
+        let seconds = 0;
+        let flagsPlaced = 0;
+        let minesLeft = totalMines;
+        
+        // Inicializace hry
+        function initGame() {
+            clearInterval(timerInterval);
+            seconds = 0;
+            flagsPlaced = 0;
+            minesLeft = totalMines;
+            gameStarted = false;
+            gameOver = false;
+            
+            minesLeftDisplay.textContent = minesLeft;
+            timerDisplay.textContent = '000';
+            faceBtn.textContent = '😊';
+            
+            board = [];
+            gameBoard.innerHTML = '';
+            gameBoard.style.gridTemplateColumns = `repeat(${boardSize}, 30px)`;
+            
+            // Vytvoření hracího pole
+            for (let row = 0; row < boardSize; row++) {
+                board[row] = [];
+                for (let col = 0; col < boardSize; col++) {
+                    board[row][col] = {
+                        isMine: false,
+                        isRevealed: false,
+                        isFlagged: false,
+                        adjacentMines: 0,
+                        element: null
+                    };
+                    
+                    const cell = document.createElement('button');
+                    cell.className = 'cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    cell.addEventListener('click', handleCellClick);
+                    cell.addEventListener('contextmenu', handleRightClick);
+                    
+                    gameBoard.appendChild(cell);
+                    board[row][col].element = cell;
+                }
+            }
+            
+            // Umístění min (nahodně, ale ne na prvním kliknutí)
+            placeMines();
+            
+            // Nastavení počtu sousedních min
+            calculateAdjacentMines();
+        }
+        
+        // Umístění min
+        function placeMines() {
+            let minesPlaced = 0;
+            const positions = [];
+            
+            // Vytvoř seznam všech pozic
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize; col++) {
+                    positions.push({ row, col });
+                }
+            }
+            
+            // Nahodně vyber pozice pro miny
+            while (minesPlaced < totalMines && positions.length > 0) {
+                const randomIndex = Math.floor(Math.random() * positions.length);
+                const pos = positions.splice(randomIndex, 1)[0];
+                board[pos.row][pos.col].isMine = true;
+                minesPlaced++;
+            }
+        }
+        
+        // Výpočet počtu sousedních min
+        function calculateAdjacentMines() {
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize; col++) {
+                    if (board[row][col].isMine) continue;
+                    
+                    let count = 0;
+                    for (let dr = -1; dr <= 1; dr++) {
+                        for (let dc = -1; dc <= 1; dc++) {
+                            if (dr === 0 && dc === 0) continue;
+                            
+                            const newRow = row + dr;
+                            const newCol = col + dc;
+                            
+                            if (newRow >= 0 && newRow < boardSize && 
+                                newCol >= 0 && newCol < boardSize && 
+                                board[newRow][newCol].isMine) {
+                                count++;
+                            }
+                        }
+                    }
+                    
+                    board[row][col].adjacentMines = count;
+                }
+            }
+        }
+        
+        // Zpracování kliknutí na buňku
+        function handleCellClick(e) {
+            if (gameOver) return;
+            
+            const row = parseInt(e.target.dataset.row);
+            const col = parseInt(e.target.dataset.col);
+            
+            if (board[row][col].isFlagged) return;
+            
+            // První kliknutí - začni hru
+            if (!gameStarted) {
+                gameStarted = true;
+                faceBtn.textContent = '😊';
+                startTimer();
+                
+                // Ujisti se, že první kliknutí není na minu
+                if (board[row][col].isMine) {
+                    // Najdi jinou pozici pro minu
+                    for (let r = 0; r < boardSize; r++) {
+                        for (let c = 0; c < boardSize; c++) {
+                            if (!board[r][c].isMine && (r !== row || c !== col)) {
+                                board[r][c].isMine = true;
+                                board[row][col].isMine = false;
+                                break;
+                            }
+                        }
+                    }
+                    calculateAdjacentMines();
+                }
+            }
+            
+            // Otevři buňku
+            revealCell(row, col);
+            
+            // Kontrola výhry
+            checkWin();
+        }
+        
+        // Zpracování pravého kliknutí (vlajka)
+        function handleRightClick(e) {
+            e.preventDefault();
+            if (gameOver) return;
+            
+            const row = parseInt(e.target.dataset.row);
+            const col = parseInt(e.target.dataset.col);
+            
+            if (board[row][col].isRevealed) return;
+            
+            if (!gameStarted) {
+                gameStarted = true;
+                startTimer();
+            }
+            
+            // Přepínání vlajky
+            if (board[row][col].isFlagged) {
+                board[row][col].isFlagged = false;
+                e.target.classList.remove('flagged');
+                e.target.textContent = '';
+                flagsPlaced--;
+                minesLeft++;
+            } else {
+                if (minesLeft > 0) {
+                    board[row][col].isFlagged = true;
+                    e.target.classList.add('flagged');
+                    e.target.textContent = '🚩';
+                    flagsPlaced++;
+                    minesLeft--;
+                }
+            }
+            
+            minesLeftDisplay.textContent = minesLeft;
+            checkWin();
+        }
+        
+        // Odhalení buňky
+        function revealCell(row, col) {
+            if (row < 0 || row >= boardSize || col < 0 || col >= boardSize) return;
+            if (board[row][col].isRevealed || board[row][col].isFlagged) return;
+            
+            board[row][col].isRevealed = true;
+            const cell = board[row][col].element;
+            cell.classList.add('revealed');
+            
+            if (board[row][col].isMine) {
+                // Konec hry - wybuch
+                cell.classList.add('mine', 'exploded');
+                cell.textContent = '💣';
+                gameOver = true;
+                faceBtn.textContent = '😢';
+                stopTimer();
+                revealAllMines();
+                showModal('Prohrál jsi!', 'Bohužel jsi klikl na minu. Zkus to znovu!');
+                return;
+            }
+            
+            if (board[row][col].adjacentMines > 0) {
+                cell.textContent = board[row][col].adjacentMines;
+                cell.classList.add(`number-${board[row][col].adjacentMines}`);
+            } else {
+                cell.classList.add('empty');
+                // Odhal sousední buňky
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        if (dr !== 0 || dc !== 0) {
+                            revealCell(row + dr, col + dc);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Odhal všechny miny
+        function revealAllMines() {
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize; col++) {
+                    if (board[row][col].isMine && !board[row][col].isFlagged) {
+                        board[row][col].element.classList.add('mine');
+                        board[row][col].element.textContent = '💣';
+                    }
+                    if (!board[row][col].isMine && board[row][col].isFlagged) {
+                        board[row][col].element.classList.add('flagged');
+                        board[row][col].element.textContent = '❌';
+                    }
+                }
+            }
+        }
+        
+        // Kontrola výhry
+        function checkWin() {
+            let allNonMinesRevealed = true;
+            let allMinesFlagged = true;
+            
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize; col++) {
+                    if (!board[row][col].isMine && !board[row][col].isRevealed) {
+                        allNonMinesRevealed = false;
+                    }
+                    if (board[row][col].isMine && !board[row][col].isFlagged) {
+                        allMinesFlagged = false;
+                    }
+                }
+            }
+            
+            if (allNonMinesRevealed || allMinesFlagged) {
+                gameOver = true;
+                faceBtn.textContent = '😎';
+                stopTimer();
+                showModal('Vyhrál jsi!', `Gratuluji! Zvládl jsi to za ${seconds} sekund.`);
+            }
+        }
+        
+        // Spuštění časovače
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                seconds++;
+                timerDisplay.textContent = String(seconds).padStart(3, '0');
+            }, 1000);
+        }
+        
+        // Zastavení časovače
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+        
+        // Zobrazení modálního okna
+        function showModal(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modal.style.display = 'flex';
+        }
+        
+        // Skryti modálního okna
+        function hideModal() {
+            modal.style.display = 'none';
+        }
+        
+        // Restart hry
+        function restartGame() {
+            hideModal();
+            initGame();
+        }
+        
+        // Změna obtížnosti
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const difficulty = this.dataset.difficulty;
+                
+                if (difficulty === 'easy') {
+                    boardSize = 8;
+                    totalMines = 10;
+                } else if (difficulty === 'medium') {
+                    boardSize = 12;
+                    totalMines = 30;
+                } else if (difficulty === 'hard') {
+                    boardSize = 15;
+                    totalMines = 50;
+                } else if (difficulty === 'custom') {
+                    openCustomModal();
+                    return;
+                }
+                
+                // Aktualizace aktivního tlačítka
+                document.querySelectorAll('.difficulty-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                minesLeft = totalMines;
+                minesLeftDisplay.textContent = minesLeft;
+                restartGame();
+            });
+        });
+        
+        // Otevření modálního okna pro vlastní nastavení
+        function openCustomModal() {
+            customModal.style.display = 'flex';
+        }
+        
+        // Zavření modálního okna pro vlastní nastavení
+        function closeCustomModal() {
+            customModal.style.display = 'none';
+        }
+        
+        // Spuštění vlastní hry
+        function startCustomGame() {
+            const rows = parseInt(document.getElementById('custom-rows').value);
+            const cols = parseInt(document.getElementById('custom-cols').value);
+            const mines = parseInt(document.getElementById('custom-mines').value);
+            
+            if (rows < 5 || rows > 30 || cols < 5 || cols > 30) {
+                alert('Počet řádků a sloupců musí být mezi 5 a 30.');
+                return;
+            }
+            
+            if (mines < 1 || mines >= rows * cols) {
+                alert('Počet min musí být alespoň 1 a méně než počet políček.');
+                return;
+            }
+            
+            boardSize = rows;
+            totalMines = mines;
+            minesLeft = totalMines;
+            minesLeftDisplay.textContent = minesLeft;
+            
+            closeCustomModal();
+            restartGame();
+            
+            // Aktualizace aktivního tlačítka
+            document.querySelectorAll('.difficulty-btn').forEach(b => {
+                b.classList.remove('active');
+            });
+        }
+        
+        // Inicializace hry při načtení stránky
+        initGame();
+        
+        // Restart při kliknutí na smiley
+        faceBtn.addEventListener('click', restartGame);
+        
+        // Zavření modálního okna při kliknutí mimo
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                hideModal();
+            }
+        });
+        
+        customModal.addEventListener('click', function(e) {
+            if (e.target === customModal) {
+                closeCustomModal();
+            }
+        });
+    </script>
+</body>
 </html>
