@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["MAIN", "main", "master"]
+    branches: ["main", "master"]
   workflow_dispatch:
 
 permissions:
@@ -16,73 +16,10 @@ concurrency:
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      # Detect project type
-      - name: Detect project type
-        id: detect
-        run: |
-          if [ -f "package.json" ]; then
-            echo "type=nodejs" >> $GITHUB_OUTPUT
-            echo "Project: Node.js detected" 
-          elif [ -f "index.html" ]; then
-            echo "type=static" >> $GITHUB_OUTPUT
-            echo "Project: Static HTML detected"
-          else
-            echo "type=unknown" >> $GITHUB_OUTPUT
-            echo "Project: Unknown type"
-          fi
-
-      # Build for Node.js projects
-      - name: Setup Node.js
-        if: steps.detect.outputs.type == 'nodejs'
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Install dependencies
-        if: steps.detect.outputs.type == 'nodejs'
-        run: npm ci
-
-      - name: Build Node.js project
-        if: steps.detect.outputs.type == 'nodejs'
-        run: npm run build
-
-      # Prepare static files (for both project types)
-      - name: Prepare static files for deployment
-        run: |
-          # Create dist directory if it doesn't exist
-          mkdir -p dist
-          
-          # For Node.js projects, files should already be in dist
-          if [ -f "package.json" ] && [ -d "dist" ] && [ "$(ls -A dist 2>/dev/null)" ]; then
-            echo "Using existing dist/ from Node.js build"
-          # For static HTML projects
-          elif [ -f "index.html" ]; then
-            echo "Copying static files to dist/"
-            # Copy all HTML, CSS, JS files from root to dist
-            find . -maxdepth 1 -type f \( -name "*.html" -o -name "*.css" -o -name "*.js" -o -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.svg" -o -name "*.webp" -o -name "*.ico" -o -name "*.txt" -o -name "*.json" \) ! -name "package*.json" ! -name "vite*.js" ! -name ".gitignore" -exec cp {} dist/ \;
-            
-            # Copy entire directories if they exist
-            if [ -d "css" ]; then cp -r css dist/; fi
-            if [ -d "js" ]; then cp -r js dist/; fi
-            if [ -d "assets" ]; then cp -r assets dist/; fi
-            if [ -d "images" ]; then cp -r images dist/; fi
-            if [ -d "img" ]; then cp -r img dist/; fi
-            if [ -d "styles" ]; then cp -r styles dist/; fi
-            if [ -d "scripts" ]; then cp -r scripts dist/; fi
-          fi
-          
-          # List what's in dist for debugging
-          echo "Contents of dist/:"
-          ls -la dist/ || true
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -90,7 +27,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist'
+          path: '.'
 
       - name: Deploy to GitHub Pages
         id: deployment
