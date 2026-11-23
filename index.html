@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pirátské Hledání Pokladů - Retro 90</title>
+    <title>Hledání min - Minesweeper</title>
     <style>
         * {
             box-sizing: border-box;
@@ -12,343 +12,169 @@
         }
         
         body {
-            font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0a0a1a 100%);
-            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             padding: 20px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        /* Retro 90. pozadí s hvězdami */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: radial-gradient(2px 2px at 20px 30px, #fff, transparent),
-                              radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
-                              radial-gradient(1px 1px at 90px 40px, #fff, transparent),
-                              radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
-                              radial-gradient(2px 2px at 160px 30px, #fff, transparent);
-            background-repeat: repeat;
-            background-size: 200px 100px;
-            animation: twinkle 3s linear infinite;
-            pointer-events: none;
-            z-index: -1;
-        }
-        
-        @keyframes twinkle {
-            from { transform: translateY(0px); }
-            to { transform: translateY(-10px); }
         }
         
         h1 {
-            color: #ffd700;
-            margin-bottom: 15px;
+            color: #333;
+            margin-bottom: 20px;
             text-align: center;
-            font-size: 2.5rem;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7), 0 0 20px rgba(255, 215, 0, 0.3);
-            letter-spacing: 0.2rem;
-            position: relative;
-        }
-        
-        h1::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, #ffd700, #ff4500, #ffd700, transparent);
         }
         
         .game-container {
-            background: linear-gradient(145deg, #16213e, #0f3460);
-            border: 3px solid #ffd700;
+            background-color: #fff;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 
-                        0 0 40px rgba(255, 215, 0, 0.1),
-                        inset 0 0 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            position: relative;
-        }
-        
-        .game-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 30px;
-            background: linear-gradient(to right, transparent, rgba(255,215,0,0.1), transparent);
-            border-bottom: 1px solid rgba(255,215,0,0.2);
         }
         
         .info-panel {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             width: 100%;
-            margin-bottom: 15px;
-            padding: 0 10px;
-            position: relative;
+            margin-bottom: 20px;
+            padding: 0 20px;
         }
         
         .info-display {
-            background: linear-gradient(135deg, #2a9d8f, #264653);
-            color: #ffd700;
-            padding: 8px 15px;
+            background-color: #333;
+            color: #ff0000;
+            padding: 8px 16px;
             border-radius: 5px;
-            font-size: 1.1rem;
+            font-size: 18px;
             font-weight: bold;
-            min-width: 70px;
+            min-width: 60px;
             text-align: center;
-            border: 1px solid #ffd700;
-            box-shadow: 0 0 10px rgba(42, 157, 143, 0.5);
-            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         }
         
         .face-button {
-            background: linear-gradient(135deg, #e76f51, #c23b22);
-            border: 2px solid #ffd700;
-            width: 45px;
-            height: 45px;
+            background-color: #ddd;
+            border: none;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 1.5rem;
+            font-size: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
-            color: #fff;
-            box-shadow: 0 0 15px rgba(231, 111, 81, 0.7);
+            transition: background-color 0.2s;
         }
         
         .face-button:hover {
-            background: linear-gradient(135deg, #ff4500, #e76f51);
-            transform: scale(1.1);
-            box-shadow: 0 0 25px rgba(255, 69, 0, 0.9);
+            background-color: #ccc;
         }
         
         .face-button:active {
             transform: scale(0.95);
         }
         
-        .game-board-container {
-            position: relative;
-            border: 2px solid #ffd700;
-            border-radius: 5px;
-            overflow: hidden;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-        }
-        
         .game-board {
             display: grid;
-            gap: 0;
-            background: linear-gradient(135deg, #1a1a2e, #0f3460);
-            padding: 0;
-            border-radius: 3px;
-            position: relative;
-        }
-        
-        /* Animované vlny v pozadí hracího pole */
-        .game-board::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, 
-                rgba(74, 144, 226, 0.1) 0%, 
-                transparent 50%, 
-                rgba(74, 144, 226, 0.1) 100%);
-            background-size: 100px 100px;
-            animation: waveBG 8s linear infinite;
-            pointer-events: none;
-            opacity: 0.5;
-        }
-        
-        @keyframes waveBG {
-            0% { transform: translateX(-100px) translateY(-100px); }
-            100% { transform: translateX(100px) translateY(100px); }
+            gap: 2px;
+            background-color: #bbb;
+            padding: 2px;
+            border-radius: 5px;
         }
         
         .cell {
             width: 30px;
             height: 30px;
-            background: linear-gradient(135deg, #16213e, #0f3460);
+            background-color: #ddd;
             border: none;
             cursor: pointer;
-            font-size: 1.1rem;
+            font-size: 16px;
             font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            transition: background-color 0.2s;
             user-select: none;
-            position: relative;
-            overflow: hidden;
         }
         
-        .cell::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, 
-                rgba(74, 144, 226, 0.3), 
-                transparent,
-                rgba(74, 144, 226, 0.1));
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .cell:hover::before {
-            opacity: 0.5;
+        .cell:hover {
+            background-color: #ccc;
         }
         
         .cell:active {
             transform: scale(0.95);
         }
         
-        /* Kostičky moře s vlněním */
-        .cell.sea {
-            background: linear-gradient(135deg, #16213e, #0f3460);
-            position: relative;
-        }
-        
-        .cell.sea::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, 
-                transparent, 
-                rgba(74, 144, 226, 0.8), 
-                rgba(74, 144, 226, 0.4), 
-                transparent);
-            animation: seaWave 2s ease-in-out infinite;
-            animation-delay: var(--wave-delay, 0s);
-        }
-        
-        @keyframes seaWave {
-            0%, 100% { 
-                opacity: 0.3;
-                transform: translateY(0);
-            }
-            50% { 
-                opacity: 0.8;
-                transform: translateY(-1px);
-            }
-        }
-        
         .cell.revealed {
-            background: linear-gradient(135deg, #2a9d8f, #264653);
+            background-color: #ddd;
             cursor: default;
-            border: 1px solid #0f3460;
         }
         
         .cell.revealed.empty {
-            background: linear-gradient(135deg, #16213e, #0f3460);
+            background-color: #eee;
         }
         
         .cell.flagged {
-            background: linear-gradient(135deg, #e76f51, #c23b22);
-            border: 1px solid #ffd700;
-            box-shadow: 0 0 10px rgba(231, 111, 81, 0.5);
+            background-color: #ffcccc;
         }
         
         .cell.mine {
-            background: linear-gradient(135deg, #8b0000, #c23b22);
-            color: #fff;
-            box-shadow: 0 0 10px rgba(139, 0, 0, 0.7);
+            background-color: #ff6666;
+            color: #000;
         }
         
         .cell.mine.exploded {
-            background: linear-gradient(135deg, #ff0000, #e76f51);
+            background-color: #ff3333;
             color: #fff;
-            animation: explode 0.5s ease-out;
         }
         
-        @keyframes explode {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.3); }
-            100% { transform: scale(1); }
-        }
-        
-        .cell.number-1 { color: #00bfff; text-shadow: 0 0 5px #00bfff; }
-        .cell.number-2 { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
-        .cell.number-3 { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
-        .cell.number-4 { color: #0000ff; text-shadow: 0 0 5px #0000ff; }
-        .cell.number-5 { color: #ff69b4; text-shadow: 0 0 5px #ff69b4; }
-        .cell.number-6 { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
-        .cell.number-7 { color: #ffff00; text-shadow: 0 0 5px #ffff00; }
-        .cell.number-8 { color: #ffffff; text-shadow: 0 0 5px #ffffff; }
+        .cell.number-1 { color: #0000ff; }
+        .cell.number-2 { color: #008000; }
+        .cell.number-3 { color: #ff0000; }
+        .cell.number-4 { color: #000080; }
+        .cell.number-5 { color: #800000; }
+        .cell.number-6 { color: #008080; }
+        .cell.number-7 { color: #000000; }
+        .cell.number-8 { color: #808080; }
         
         .controls {
             margin-top: 20px;
             display: flex;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
             justify-content: center;
         }
         
         .difficulty-btn {
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #2a9d8f, #264653);
-            color: #ffd700;
-            border: 2px solid #ffd700;
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 1rem;
-            font-weight: bold;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 0.1rem;
-            box-shadow: 0 0 10px rgba(42, 157, 143, 0.5);
+            font-size: 14px;
+            transition: background-color 0.2s;
         }
         
         .difficulty-btn:hover {
-            background: linear-gradient(135deg, #4ecdc4, #45b7d1);
-            transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(78, 205, 196, 0.7);
+            background-color: #45a049;
         }
         
         .difficulty-btn.active {
-            background: linear-gradient(135deg, #ffd700, #ffaa00);
-            color: #1a1a2e;
-            border-color: #ffd700;
-            box-shadow: 0 0 25px rgba(255, 215, 0, 0.8);
+            background-color: #2E7D32;
         }
         
         .instructions {
             margin-top: 20px;
-            color: #aaa;
-            font-size: 0.9rem;
+            color: #666;
+            font-size: 14px;
             text-align: center;
-            max-width: 600px;
-            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-        }
-        
-        .instructions strong {
-            color: #ffd700;
+            max-width: 500px;
         }
         
         .modal {
@@ -358,138 +184,90 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background-color: rgba(0, 0, 0, 0.7);
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            backdrop-filter: blur(5px);
         }
         
         .modal-content {
-            background: linear-gradient(135deg, #16213e, #0f3460);
-            padding: 40px;
-            border-radius: 15px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
             text-align: center;
-            max-width: 450px;
+            max-width: 400px;
             width: 90%;
-            border: 3px solid #ffd700;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .modal-content::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.1), transparent);
-            animation: shine 3s infinite;
-        }
-        
-        @keyframes shine {
-            0% { left: -100%; }
-            50%, 100% { left: 100%; }
         }
         
         .modal h2 {
-            color: #ffd700;
-            margin-bottom: 20px;
-            font-size: 2.2rem;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
-            position: relative;
+            color: #333;
+            margin-bottom: 15px;
         }
         
         .modal p {
-            color: #e0e0e0;
-            margin-bottom: 30px;
-            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 20px;
         }
         
         .modal-btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #2a9d8f, #264653);
-            color: #ffd700;
-            border: 2px solid #ffd700;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 1.1rem;
-            font-weight: bold;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 0.1rem;
-            box-shadow: 0 0 15px rgba(42, 157, 143, 0.5);
+            font-size: 16px;
+            transition: background-color 0.2s;
         }
         
         .modal-btn:hover {
-            background: linear-gradient(135deg, #4ecdc4, #45b7d1);
-            transform: translateY(-2px);
-            box-shadow: 0 0 25px rgba(78, 205, 196, 0.8);
+            background-color: #45a049;
         }
         
         .modal-btn.restart {
-            background: linear-gradient(135deg, #e76f51, #c23b22);
-            border-color: #ff4500;
+            background-color: #f44336;
         }
         
         .modal-btn.restart:hover {
-            background: linear-gradient(135deg, #ff4500, #e76f51);
-            box-shadow: 0 0 25px rgba(255, 69, 0, 0.8);
-        }
-        
-        /* Pirátské ikony */
-        .icon {
-            font-size: 1.2rem;
+            background-color: #d32f2f;
         }
         
         @media (max-width: 600px) {
             .cell {
                 width: 25px;
                 height: 25px;
-                font-size: 1rem;
+                font-size: 14px;
             }
             
             .info-panel {
                 flex-direction: column;
                 gap: 10px;
-            }
-            
-            h1 {
-                font-size: 1.8rem;
-            }
-            
-            .modal-content {
-                padding: 25px;
-                margin: 20px;
+                align-items: center;
             }
         }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <h1>Pirátské Lov Pokladů</h1>
+        <h1>Hledání min</h1>
         
         <div class="info-panel">
-            <div class="info-display" id="mines-left">🏴‍☠️</div>
-            <button class="face-button" id="face-btn">🏴‍☠️</button>
+            <div class="info-display" id="mines-left">10</div>
+            <button class="face-button" id="face-btn">😊</button>
             <div class="info-display" id="timer">000</div>
         </div>
         
-        <div class="game-board-container">
-            <div class="game-board" id="game-board"></div>
-        </div>
+        <div class="game-board" id="game-board"></div>
         
         <div class="controls">
-            <button class="difficulty-btn" data-difficulty="easy">🏝️ Snadné</button>
-            <button class="difficulty-btn" data-difficulty="medium">⚓ Střední</button>
-            <button class="difficulty-btn active" data-difficulty="hard">☠️ Těžké</button>
-            <button class="difficulty-btn" data-difficulty="custom">⚔️ Vlastní...</button>
+            <button class="difficulty-btn" data-difficulty="easy">Snadné (8x8, 10 min)</button>
+            <button class="difficulty-btn" data-difficulty="medium">Střední (12x12, 30 min)</button>
+            <button class="difficulty-btn active" data-difficulty="hard">Těžké (15x15, 50 min)</button>
+            <button class="difficulty-btn" data-difficulty="custom">Vlastní...</button>
         </div>
         
         <div class="instructions">
-            <strong>Ovládání:</strong> Levý klik = odhalit, Pravý klik = pirátská vlajka (🏴‍☠️)
+            <strong>Ovládání:</strong> Kliknutí levým tlačítkem odhalí políčko, kliknutí pravým tlačítkem umístí vlajku.
         </div>
     </div>
     
@@ -497,7 +275,7 @@
     <div class="modal" id="modal">
         <div class="modal-content">
             <h2 id="modal-title">Vyhrál jsi!</h2>
-            <p id="modal-message">Gratuluji! Všechny poklady jsi našel bez potopení!</p>
+            <p id="modal-message">Gratuluji! Všechny miny jsi našel bez výbuchu.</p>
             <button class="modal-btn restart" onclick="restartGame()">Hrát znovu</button>
         </div>
     </div>
@@ -505,26 +283,20 @@
     <!-- Modal pro vlastní nastavení -->
     <div class="modal" id="custom-modal">
         <div class="modal-content">
-            <h2>Vlastní Nastavení</h2>
-            <div style="margin: 25px 0; text-align: left;">
-                <div style="margin-bottom: 15px;">
-                    <label for="custom-rows" style="display: block; margin-bottom: 5px; color: #ffd700; font-weight: bold;">Počet řádků:</label>
-                    <input type="number" id="custom-rows" value="15" min="5" max="30" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid #2a9d8f; border-radius: 5px; background: #16213e; color: #ffd700; font-size: 1rem;">
-                </div>
+            <h2>Vlastní nastavení</h2>
+            <div style="margin: 20px 0; text-align: left;">
+                <label for="custom-rows" style="display: block; margin-bottom: 5px;">Počet řádků:</label>
+                <input type="number" id="custom-rows" value="15" min="5" max="30" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px;">
                 
-                <div style="margin-bottom: 15px;">
-                    <label for="custom-cols" style="display: block; margin-bottom: 5px; color: #ffd700; font-weight: bold;">Počet sloupců:</label>
-                    <input type="number" id="custom-cols" value="15" min="5" max="30" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid #2a9d8f; border-radius: 5px; background: #16213e; color: #ffd700; font-size: 1rem;">
-                </div>
+                <label for="custom-cols" style="display: block; margin-bottom: 5px;">Počet sloupců:</label>
+                <input type="number" id="custom-cols" value="15" min="5" max="30" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px;">
                 
-                <div style="margin-bottom: 15px;">
-                    <label for="custom-mines" style="display: block; margin-bottom: 5px; color: #ffd700; font-weight: bold;">Počet kanónů:</label>
-                    <input type="number" id="custom-mines" value="50" min="1" max="500" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid #2a9d8f; border-radius: 5px; background: #16213e; color: #ffd700; font-size: 1rem;">
-                </div>
+                <label for="custom-mines" style="display: block; margin-bottom: 5px;">Počet min:</label>
+                <input type="number" id="custom-mines" value="50" min="1" max="500" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px;">
             </div>
-            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
-                <button class="modal-btn" onclick="startCustomGame()">✅ Potvrdit</button>
-                <button class="modal-btn" onclick="closeCustomModal()">❌ Zrušit</button>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="modal-btn" onclick="startCustomGame()">Potvrdit</button>
+                <button class="modal-btn" onclick="closeCustomModal()">Zrušit</button>
             </div>
         </div>
     </div>
@@ -549,18 +321,6 @@
         let seconds = 0;
         let flagsPlaced = 0;
         let minesLeft = totalMines;
-        let waveAnimations = [];
-        
-        // Pirátské ikony
-        const PIRATE_ICONS = {
-            mine: '💣',
-            flag: '🏴‍☠️',
-            wrongFlag: '❌',
-            ship: '⛵',
-            treasure: '💰',
-            cannon: '🔫',
-            pirate: '☠️'
-        };
         
         // Inicializace hry
         function initGame() {
@@ -571,9 +331,9 @@
             gameStarted = false;
             gameOver = false;
             
-            minesLeftDisplay.textContent = PIRATE_ICONS.cannon + ' ' + minesLeft;
+            minesLeftDisplay.textContent = minesLeft;
             timerDisplay.textContent = '000';
-            faceBtn.textContent = PIRATE_ICONS.pirate;
+            faceBtn.textContent = '😊';
             
             board = [];
             gameBoard.innerHTML = '';
@@ -592,10 +352,9 @@
                     };
                     
                     const cell = document.createElement('button');
-                    cell.className = 'cell sea';
+                    cell.className = 'cell';
                     cell.dataset.row = row;
                     cell.dataset.col = col;
-                    cell.style.setProperty('--wave-delay', `${Math.random() * 2}s`);
                     cell.addEventListener('click', handleCellClick);
                     cell.addEventListener('contextmenu', handleRightClick);
                     
@@ -609,17 +368,9 @@
             
             // Nastavení počtu sousedních min
             calculateAdjacentMines();
-            
-            // Nastavení vlnících se kostiček
-            setupWaveAnimations();
         }
         
-        // Nastavení animací vln
-        function setupWaveAnimations() {
-            // Případně další specifické animace
-        }
-        
-        // Umístění min (kanónů)
+        // Umístění min
         function placeMines() {
             let minesPlaced = 0;
             const positions = [];
@@ -679,7 +430,7 @@
             // První kliknutí - začni hru
             if (!gameStarted) {
                 gameStarted = true;
-                faceBtn.textContent = PIRATE_ICONS.pirate;
+                faceBtn.textContent = '😊';
                 startTimer();
                 
                 // Ujisti se, že první kliknutí není na minu
@@ -705,7 +456,7 @@
             checkWin();
         }
         
-        // Zpracování pravého kliknutí (pirátská vlajka)
+        // Zpracování pravého kliknutí (vlajka)
         function handleRightClick(e) {
             e.preventDefault();
             if (gameOver) return;
@@ -731,13 +482,13 @@
                 if (minesLeft > 0) {
                     board[row][col].isFlagged = true;
                     e.target.classList.add('flagged');
-                    e.target.textContent = PIRATE_ICONS.flag;
+                    e.target.textContent = '🚩';
                     flagsPlaced++;
                     minesLeft--;
                 }
             }
             
-            minesLeftDisplay.textContent = PIRATE_ICONS.cannon + ' ' + minesLeft;
+            minesLeftDisplay.textContent = minesLeft;
             checkWin();
         }
         
@@ -749,18 +500,16 @@
             board[row][col].isRevealed = true;
             const cell = board[row][col].element;
             cell.classList.add('revealed');
-            cell.classList.remove('sea');
-            cell.innerHTML = '';
             
             if (board[row][col].isMine) {
-                // Konec hry - výbuch
+                // Konec hry - wybuch
                 cell.classList.add('mine', 'exploded');
-                cell.innerHTML = PIRATE_ICONS.mine + '<span style="position:absolute;top:-5px;left:-5px;font-size:1.5rem;">💥</span>';
+                cell.textContent = '💣';
                 gameOver = true;
-                faceBtn.textContent = '💀';
+                faceBtn.textContent = '😢';
                 stopTimer();
                 revealAllMines();
-                showModal('Prohrál jsi!', 'Tvoje loď byla potopena kanónovou koulí! Zkus to znovu, kapitáne!');
+                showModal('Prohrál jsi!', 'Bohužel jsi klikl na minu. Zkus to znovu!');
                 return;
             }
             
@@ -786,11 +535,11 @@
                 for (let col = 0; col < boardSize; col++) {
                     if (board[row][col].isMine && !board[row][col].isFlagged) {
                         board[row][col].element.classList.add('mine');
-                        board[row][col].element.innerHTML = PIRATE_ICONS.mine;
+                        board[row][col].element.textContent = '💣';
                     }
                     if (!board[row][col].isMine && board[row][col].isFlagged) {
-                        board[row][col].element.classList.add('flagged', 'mine');
-                        board[row][col].element.innerHTML = PIRATE_ICONS.wrongFlag;
+                        board[row][col].element.classList.add('flagged');
+                        board[row][col].element.textContent = '❌';
                     }
                 }
             }
@@ -816,7 +565,7 @@
                 gameOver = true;
                 faceBtn.textContent = '😎';
                 stopTimer();
-                showModal('Vyhrál jsi!', `Gratuluji, kapitáne! Všechny kanóny jsi našel za ${seconds} sekund. Tvoje loď je v bezpečí!`);
+                showModal('Vyhrál jsi!', `Gratuluji! Zvládl jsi to za ${seconds} sekund.`);
             }
         }
         
@@ -880,7 +629,7 @@
                 this.classList.add('active');
                 
                 minesLeft = totalMines;
-                minesLeftDisplay.textContent = PIRATE_ICONS.cannon + ' ' + minesLeft;
+                minesLeftDisplay.textContent = minesLeft;
                 restartGame();
             });
         });
@@ -907,14 +656,14 @@
             }
             
             if (mines < 1 || mines >= rows * cols) {
-                alert('Počet kanónů musí být alespoň 1 a méně než počet políček.');
+                alert('Počet min musí být alespoň 1 a méně než počet políček.');
                 return;
             }
             
             boardSize = rows;
             totalMines = mines;
             minesLeft = totalMines;
-            minesLeftDisplay.textContent = PIRATE_ICONS.cannon + ' ' + minesLeft;
+            minesLeftDisplay.textContent = minesLeft;
             
             closeCustomModal();
             restartGame();
@@ -928,7 +677,7 @@
         // Inicializace hry při načtení stránky
         initGame();
         
-        // Restart při kliknutí na pirátskou ikonu
+        // Restart při kliknutí na smiley
         faceBtn.addEventListener('click', restartGame);
         
         // Zavření modálního okna při kliknutí mimo
@@ -943,27 +692,6 @@
                 closeCustomModal();
             }
         });
-        
-        // Nastavení vlnících se kostiček pro každou buňku
-        function animateWaves() {
-            const cells = document.querySelectorAll('.cell:not(.revealed):not(.flagged)');
-            cells.forEach((cell, index) => {
-                const delay = (index % 20) * 0.1;
-                cell.style.animationDelay = `${delay}s`;
-            });
-        }
-        
-        // Periodické vlnění
-        setInterval(() => {
-            if (!gameOver) {
-                const cells = document.querySelectorAll('.cell.sea');
-                cells.forEach(cell => {
-                    cell.style.animation = 'none';
-                    cell.offsetHeight; // Trigger reflow
-                    cell.style.animation = 'seaWave 2s ease-in-out infinite';
-                });
-            }
-        }, 5000);
     </script>
 </body>
 </html>
